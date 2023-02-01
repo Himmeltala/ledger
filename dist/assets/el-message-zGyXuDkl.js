@@ -1,0 +1,1 @@
+const i=async(r,e,t)=>{r&&await r.validate(n=>{n?e&&e():t&&t()})},o=(r,e,t)=>{if(!e)return t(new Error("请输入正确格式的金额！"));setTimeout(()=>{const n=e.toString().length;n>=1&&n<=20?t():t(new Error("金额在 1~9 位数！"))},20)};export{i as f,o as v};

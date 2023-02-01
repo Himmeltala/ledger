@@ -1,7 +1,7 @@
-# Vue 3 + Vite
+# 项目说明
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+一个规划自己每月开支的账单小程序。设定每月可用支出，记录每月每笔开销，下月根据上月所预支开销，计算每月可用实际支出。
 
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+<img src="./docs/item1.png" style="zoom: 35%" />
+<img src="./docs/item2.png" style="zoom: 35%" />
+<img src="./docs/item3.png" style="zoom: 35%" />
