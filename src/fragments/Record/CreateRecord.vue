@@ -65,6 +65,7 @@ for (let i = 0; i < 12; i++) {
         :model="formData"
         :rules="formRule"
         status-icon
+        @opened="formInst.resetFields()"
         hide-required-asterisk
         label-position="left">
         <el-form-item label="年份" prop="year">

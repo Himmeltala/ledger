@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getStorageData } from "@/apis";
+import type { FormInstance } from "element-plus";
 
 const props = defineProps({
   record: {
@@ -66,11 +67,7 @@ function deleteItemForDialog() {
         </el-form-item>
         <el-form-item label="类型" prop="type">
           <el-radio-group v-model="formData.type">
-            <el-radio
-              v-for="item in ['支', '收']"
-              disabled
-              :label="item"
-              :value="item"></el-radio>
+            <el-radio v-for="item in ['支', '收']" disabled :label="item" :value="item"></el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="连同" prop="sameat">

@@ -85,6 +85,7 @@ function onAutocompleteSelected(remark: IComments) {
 }
 
 const sameatOps = ref([]);
+
 function openAddDialog() {
   sameatOps.value = [];
   getCurrYKs(props.record, props.currYear).forEach(value => {
@@ -101,7 +102,12 @@ function openAddDialog() {
         <div class="i-tabler-pencil-plus"></div>
       </template>
     </el-button>
-    <el-dialog append-to-body width="90%" v-model="dialog" title="添加收支">
+    <el-dialog
+      append-to-body
+      width="90%"
+      v-model="dialog"
+      title="添加收支"
+      @opened="formInst.resetFields()">
       <el-form
         ref="formInst"
         :model="formData"

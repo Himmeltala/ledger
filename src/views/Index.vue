@@ -162,10 +162,7 @@ watch(stroage, () => {
               <span>
                 {{ stroage.record[currY][currM].budget }}
               </span>
-            </div>
-            <div class="f-c-c">
-              <div class="i-tabler-chart-area-line text-text-secondary"></div>
-              <span class="text-text-secondary mr-1">剩余</span>
+              <span class="text-text-secondary mr-1">，剩余</span>
               <span>
                 {{ getSurplusOfCurrR(stroage.record, currY, currM) }}
               </span>
