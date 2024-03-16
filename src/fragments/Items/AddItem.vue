@@ -3,7 +3,7 @@ import { PropType } from "vue";
 import { Coin, ChatDotRound } from "@element-plus/icons-vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { formValidator, validateMoney } from "@/utils/form-util";
-import { getCurrYKs, getStorageData } from "@/apis";
+import { getCurrYMs, getStorageData } from "@/apis";
 
 const props = defineProps({
   record: {
@@ -20,8 +20,16 @@ const props = defineProps({
   }
 });
 
+const emits = defineEmits(["added"]);
+
+const storage = getStorageData();
 const dialog = ref(false);
-const formData = ref<any>({ cost: 100, text: "", type: "支", sameness: [] });
+const formData = ref<IItems & { sameness: string[] }>({
+  cost: 100,
+  text: "",
+  type: "支",
+  sameness: []
+});
 const formInst = ref<FormInstance>();
 const formRule = ref<FormRules>({
   cost: [{ validator: validateMoney, trigger: "change" }],
@@ -30,7 +38,6 @@ const formRule = ref<FormRules>({
     { min: 1, max: 50, message: "长度在1~50个字符之间", trigger: "blur" }
   ]
 });
-const storage = getStorageData();
 
 function storeRecord(lastIndx: ISameat) {
   for (let i = 0; i < lastIndx.length; i++) {
@@ -58,6 +65,7 @@ function confirmSubmit() {
       storeRecord(lastIndx);
       dialog.value = !dialog.value;
       ElMessage.success("添加成功！");
+      emits("added");
     },
     () => {
       ElMessage.error("检查输入的值是否正确！");
@@ -88,7 +96,8 @@ const sameatOps = ref([]);
 
 function openAddDialog() {
   sameatOps.value = [];
-  getCurrYKs(props.record, props.currYear).forEach(value => {
+  formData.value.sameness = [storage.value.viewdDate.month];
+  getCurrYMs(props.record, props.currYear).forEach(value => {
     sameatOps.value.push(value);
   });
   dialog.value = !dialog.value;
@@ -136,7 +145,7 @@ function openAddDialog() {
             <el-radio v-for="item in ['支', '收']" :label="item" :value="item"></el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="连同" prop="sameat">
+        <el-form-item label="连同">
           <el-checkbox-group v-model="formData.sameness">
             <template v-for="item in sameatOps">
               <el-checkbox

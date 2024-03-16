@@ -24,6 +24,8 @@ const props = defineProps({
   }
 });
 
+const emits = defineEmits(["updated"]);
+
 const dialog = ref(false);
 const formInst = ref<FormInstance>();
 const formRule = ref<FormRules>({
@@ -65,6 +67,7 @@ function confirmSubmit() {
         ...formData.value
       };
       ElMessage.success("修改成功！");
+      emits("updated");
     },
     () => {
       ElMessage.error("修改失败！检查输入的值是否正确");

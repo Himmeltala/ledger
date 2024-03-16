@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { UploadProps } from "element-plus";
 import { generateDate } from "@/utils/date-util";
-import { getCurrYKs, getStorageData, getSurplusOfCurrR } from "@/apis";
+import { getStorageData } from "@/apis";
 
 function exportJson() {
   const blob = new Blob([JSON.stringify(getStorageData().value)], { type: "text/json" });

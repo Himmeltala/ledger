@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getStorageData } from "@/apis";
-import type { FormInstance } from "element-plus";
 
 const props = defineProps({
   record: {
@@ -20,6 +19,8 @@ const props = defineProps({
     required: true
   }
 });
+
+const emits = defineEmits(["deleted"]);
 
 const dialog = ref(false);
 const stroage = getStorageData();
@@ -46,6 +47,7 @@ function deleteItemForDialog() {
   }
 
   dialog.value = !dialog.value;
+  emits("deleted");
 }
 </script>
 

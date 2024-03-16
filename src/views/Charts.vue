@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useEcharts } from "@/hooks/use-echarts";
-import { getStorageData, getCurrYKs } from "@/apis";
+import { getStorageData, getCurrYMs } from "@/apis";
 import { getCurrYear } from "@/utils";
 
 const storage = getStorageData();
@@ -25,7 +25,7 @@ function init() {
     seriesData.push(costs);
   }
 
-  const xAxisData = getCurrYKs(storage.value.record, currYear.value);
+  const xAxisData = getCurrYMs(storage.value.record, currYear.value);
 
   useEcharts({
     dom: recordChartRef.value,
