@@ -1,18 +1,12 @@
 export function generateDate() {
   const date = new Date();
-  const year = date.getFullYear().toString();
-  const month = (date.getMonth() + 1).toString();
-  const day = date.getDate().toString();
-  const hour = date.getHours().toString();
-  const minute = date.getMinutes().toString();
-  const second = date.getSeconds().toString();
   return {
-    year,
-    month,
-    day,
-    hour,
-    minute,
-    second
+    year: date.getFullYear().toString(),
+    month: (date.getMonth() + 1).toString(),
+    day: date.getDate().toString(),
+    hour: date.getHours().toString(),
+    minute: date.getMinutes().toString(),
+    second: date.getSeconds().toString()
   };
 }
 

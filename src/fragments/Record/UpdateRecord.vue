@@ -26,6 +26,11 @@ const formRule = ref<FormRules>({
 });
 const formData = ref<IMonth>({ ...props.record[props.currYear][props.currMonth] });
 
+function openUpdateDialog() {
+  formData.value = { ...props.record[props.currYear][props.currMonth] };
+  dialog.value = !dialog.value;
+}
+
 function confirmSubmit() {
   formValidator(
     formInst.value,
@@ -46,7 +51,7 @@ function confirmSubmit() {
 
 <template>
   <div>
-    <el-button plain round type="info" size="small" @click="dialog = !dialog">修改</el-button>
+    <el-button plain round type="info" size="small" @click="openUpdateDialog">修改</el-button>
     <el-dialog append-to-body width="90%" v-model="dialog" title="修改记录">
       <el-form
         ref="formInst"

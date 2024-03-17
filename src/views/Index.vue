@@ -8,12 +8,12 @@ import {
   getSurplusOfCurrR,
   getSpendingIncreasesPercentage
 } from "@/apis";
-import { getCurrYear, getCurrMonth } from "@/utils";
+import { getCurrY, getCurrM } from "@/utils";
 
 const stroage = getStorageData();
 const drawer = ref(false);
-const currY = ref(getCurrYear());
-const currM = ref(getCurrMonth());
+const currY = ref(getCurrY());
+const currM = ref(getCurrM());
 const currYMs = ref([]);
 const allY = ref([]);
 

@@ -1,4 +1,4 @@
-export function getCurrYear(date?: Date) {
+export function getCurrY(date?: Date) {
   if (date) {
     return date.getFullYear().toString();
   } else {
@@ -6,7 +6,7 @@ export function getCurrYear(date?: Date) {
   }
 }
 
-export function getCurrMonth(date?: Date) {
+export function getCurrM(date?: Date) {
   if (date) {
     return (date.getMonth() + 1).toString();
   } else {

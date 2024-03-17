@@ -57,6 +57,11 @@ function onAutocompleteSelected(remark: IComments) {
   props.record[props.currYear][props.currMonth].items[props.itemIndex].cost = remark.cost;
 }
 
+function openUpdateDialog() {
+  formData.value = { ...props.record[props.currYear][props.currMonth].items[props.itemIndex] };
+  dialog.value = !dialog.value;
+}
+
 function confirmSubmit() {
   formValidator(
     formInst.value,
@@ -78,7 +83,7 @@ function confirmSubmit() {
 
 <template>
   <div>
-    <el-button @click="dialog = !dialog" size="small" type="primary" text>编辑收支</el-button>
+    <el-button @click="openUpdateDialog" size="small" type="primary" text>编辑收支</el-button>
     <el-dialog append-to-body width="90%" v-model="dialog" title="修改支出项">
       <el-form
         ref="formInst"

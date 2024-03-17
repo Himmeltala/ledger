@@ -21,9 +21,6 @@ echarts.use([
 
 /**
  * 正常渲染图形
- *
- * @param dom 图形实例
- * @param options 配置选项
  */
 function rendering(dom: HTMLElement, options: any) {
   const theChart = echarts.init(dom, options.mode || "light");
@@ -32,8 +29,6 @@ function rendering(dom: HTMLElement, options: any) {
 
 /**
  * 渲染图表
- *
- * @param config
  */
 export function useEcharts(config: { dom: HTMLElement; options?: any }) {
   const options = {

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useEcharts } from "@/hooks/use-echarts";
 import { getStorageData, getCurrYMs } from "@/apis";
-import { getCurrYear } from "@/utils";
+import { getCurrY } from "@/utils";
 
 const storage = getStorageData();
-const currYear = ref(getCurrYear());
+const currYear = ref(getCurrY());
 const recordChartRef = shallowRef();
 
 function init() {
