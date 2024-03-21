@@ -2,7 +2,7 @@
 import { PropType } from "vue";
 import { Coin } from "@element-plus/icons-vue";
 import type { FormInstance, FormRules } from "element-plus";
-import { formValidator, validateMoney } from "@/utils/form-util";
+import { formValidator, validateMoney } from "@/utils";
 
 const props = defineProps({
   record: {
@@ -51,7 +51,7 @@ function confirmSubmit() {
 
 <template>
   <div>
-    <el-button plain round type="info" size="small" @click="openUpdateDialog">修改</el-button>
+    <el-button type="info" size="small" text @click="openUpdateDialog">修改记录</el-button>
     <el-dialog append-to-body width="90%" v-model="dialog" title="修改记录">
       <el-form
         ref="formInst"

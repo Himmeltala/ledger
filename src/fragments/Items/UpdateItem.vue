@@ -2,7 +2,7 @@
 import { PropType } from "vue";
 import { Coin, ChatDotRound } from "@element-plus/icons-vue";
 import type { FormInstance, FormRules } from "element-plus";
-import { formValidator, validateMoney } from "@/utils/form-util";
+import { formValidator, validateMoney } from "@/utils";
 import { getStorage } from "@/apis";
 
 const props = defineProps({

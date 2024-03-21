@@ -2,7 +2,7 @@
 import { PropType } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { Coin } from "@element-plus/icons-vue";
-import { formValidator } from "@/utils/form-util";
+import { formValidator } from "@/utils";
 import { setR } from "@/apis";
 
 const props = defineProps({
@@ -59,7 +59,7 @@ for (let i = 0; i < 12; i++) {
 
 <template>
   <div>
-    <el-button plain round size="small" type="primary" @click="dialog = !dialog">创建</el-button>
+    <el-button size="small" type="primary" text @click="dialog = !dialog">创建记录</el-button>
     <el-dialog
       append-to-body
       width="90%"

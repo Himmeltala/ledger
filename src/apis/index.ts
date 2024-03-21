@@ -153,6 +153,11 @@ export function getSurplusOfR(record: IRecord, currY: string, currK: string) {
   return Number(surplus.toFixed(2));
 }
 
+/**
+ * 计算本月较与上月的支出占比，体现出本月支出上升多少或下降多少的百分比
+ *
+ * @TODO 需要考虑好本年第一个月和去年最后一个月的计算
+ */
 export function getSpendingIncreasesPercentage(record: IRecord, currY: string, currK: string) {
   const currMs = getMs(record, currY);
   let currROutcome = 0,
@@ -208,20 +213,8 @@ export function setR(record: IRecord, currY: string, currM: string, data: IMonth
 }
 
 /**
- * 设置上一次预览的月账单
+ * 设置上一次预览日期
  */
 export function setViewdDate(storage: IStorageData, currY: string, currM: string) {
   storage.viewdDate = { year: currY, month: currM };
-}
-
-export function getSpendingOfM(record: IRecord, currY: string, currM: string) {
-  const m = record[currY][currM];
-
-  if (m?.items) {
-    return m.items.reduce((total, item) => {
-      return item.type === "支" ? total + Number(item.cost) : total;
-    }, 0);
-  }
-
-  return 0;
 }

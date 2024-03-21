@@ -2,7 +2,7 @@
 import { PropType } from "vue";
 import { Coin, ChatDotRound } from "@element-plus/icons-vue";
 import type { FormInstance, FormRules } from "element-plus";
-import { formValidator, validateMoney } from "@/utils/form-util";
+import { formValidator, validateMoney } from "@/utils";
 import { getMs, getStorage } from "@/apis";
 
 const props = defineProps({
@@ -53,9 +53,9 @@ function confirmSubmit() {
           sameat: formData.value.sameat
         });
       }
+      emits("added");
       dialog.value = !dialog.value;
       ElMessage.success("添加成功！");
-      emits("added");
     },
     () => {
       ElMessage.error("检查输入的值是否正确！");
@@ -82,24 +82,21 @@ function onAutocompleteSelected(remark: IComments) {
   formData.value.type = remark.type;
 }
 
-function openAddDialog() {
-  dialog.value = !dialog.value;
+function afterOpenedDialog() {
+  formInst.value.resetFields();
+  formData.value.sameat = [props.currM];
 }
 </script>
 
 <template>
   <div>
-    <el-button @click="openAddDialog" size="small" plain round type="success">
-      <template #icon>
-        <div class="i-tabler-pencil-plus"></div>
-      </template>
-    </el-button>
+    <el-button @click="dialog = !dialog" size="small" text type="success">添加收支</el-button>
     <el-dialog
       append-to-body
       width="90%"
       v-model="dialog"
       title="添加收支"
-      @opened="formInst.resetFields()">
+      @opened="afterOpenedDialog">
       <el-form
         ref="formInst"
         :model="formData"

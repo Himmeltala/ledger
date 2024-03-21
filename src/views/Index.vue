@@ -2,10 +2,10 @@
 import {
   getMs,
   getYs,
-  getStorage,
-  setViewdDate,
   safetyR,
-  getSpendingOfM,
+  getStorage,
+  getOutcome,
+  setViewdDate,
   getSurplusOfR,
   getSpendingIncreasesPercentage
 } from "@/apis";
@@ -106,48 +106,57 @@ function recountR() {
         <el-option v-for="item in currMs" :key="item + '月'" :label="item + '月'" :value="item" />
       </el-select>
     </div>
-    <div class="f-c-s mt-4">
-      <el-popconfirm
-        @confirm="deleteR"
-        confirm-button-text="确定"
-        cancel-button-text="取消"
-        title="确定删除该记录？">
-        <template #reference>
-          <el-button size="small" plain round type="danger">删除</el-button>
+    <div class="f-c-e mt-4">
+      <el-dropdown trigger="click">
+        <el-button size="small" plain round>
+          <template #icon>
+            <div class="i-tabler-dots"></div>
+          </template>
+        </el-button>
+        <template #dropdown>
+          <div class="m-2">
+            <el-popconfirm
+              @confirm="deleteR"
+              confirm-button-text="确定"
+              cancel-button-text="取消"
+              title="确定删除该记录？">
+              <template #reference>
+                <el-button class="mb-2" size="small" text type="danger">删除记录</el-button>
+              </template>
+            </el-popconfirm>
+            <CreateRecord
+              class="mb-2"
+              @on-created="afterCreatedR"
+              :record="storage.record"
+              :curr-y="currY" />
+            <UpdateRecord class="mb-2" :record="storage.record" :curr-y="currY" :curr-m="currM" />
+            <AddItem :record="storage.record" :curr-y="currY" :curr-m="currM" @added="recountR" />
+          </div>
         </template>
-      </el-popconfirm>
-      <CreateRecord
-        class="ml-4"
-        @on-created="afterCreatedR"
-        :record="storage.record"
-        :curr-y="currY" />
-      <UpdateRecord class="ml-4" :record="storage.record" :curr-y="currY" :curr-m="currM" />
+      </el-dropdown>
     </div>
     <div class="mt-2">
       <div>
-        <div class="f-c-b mb-4">
-          <div class="f-c-e text-text-regular text-0.8rem">
-            <div class="f-c-c mr-4">
-              <div class="i-tabler-coin-yen text-text-secondary mr-1"></div>
-              <span class="text-text-secondary mr-1">预算</span>
-              <span>
-                {{ storage.record[currY][currM]?.budget }}
-              </span>
-              <span class="text-text-secondary mr-1">，剩余</span>
-              <span v-if="storage.record[currY][currM]?.surplus >= 0" class="text-green">
-                {{ storage.record[currY][currM].surplus }}
-              </span>
-              <span v-else class="text-red">{{ storage.record[currY][currM]?.surplus }}</span>
-            </div>
+        <div class="f-c-s text-text-regular text-0.8rem">
+          <div class="f-c-c">
+            <div class="i-tabler-coin-yen text-text-secondary mr-1"></div>
+            <span class="text-text-secondary mr-1">预算</span>
+            <span>
+              {{ storage.record[currY][currM]?.budget }}
+            </span>
+            <span class="text-text-secondary mr-1">，剩余</span>
+            <span v-if="storage.record[currY][currM]?.surplus >= 0" class="text-green">
+              {{ storage.record[currY][currM].surplus }}
+            </span>
+            <span v-else class="text-red">{{ storage.record[currY][currM]?.surplus }}</span>
           </div>
-          <AddItem :record="storage.record" :curr-y="currY" :curr-m="currM" @added="recountR" />
         </div>
-        <div class="f-c-e text-0.8rem text-text-regular">
+        <div class="f-c-e text-text-regular text-0.8rem">
           <div class="f-c-c">
             <div class="i-tabler-map-south text-text-secondary mr-1"></div>
             <span class="text-text-secondary mr-1">支出</span>
             <span>
-              {{ getSpendingOfM(storage.record, currY, currM) }}
+              {{ getOutcome(storage.record, currY, currM) }}
             </span>
           </div>
           <span class="text-text-secondary mr-1">，比上月</span>
@@ -163,47 +172,49 @@ function recountR() {
       </div>
       <div class="mt-4">
         <div
-          class="mt-20"
           v-if="
             !(storage.record[currY][currM]?.items && storage.record[currY][currM]?.items.length)
-          ">
+          "
+          class="mt-20">
           <el-result icon="info" title="提示">
             <template #sub-title>
               <p>没有收支记录</p>
             </template>
           </el-result>
         </div>
-        <div
-          v-for="(item, index) in storage.record[currY][currM]?.items"
-          class="w-100% bg-bg-overlay p-4 rd-2 mt-2">
-          <el-dropdown trigger="click" class="w-100%">
-            <div class="w-100% f-c-b">
-              <div class="f-c-s">
-                <el-tag size="small" class="mr-4" :type="item.type === '支' ? 'danger' : 'success'">
-                  {{ item.type }}
-                </el-tag>
+        <el-dropdown
+          trigger="click"
+          class="w-100% bg-bg-overlay p-4 rd-2 mt-2"
+          v-for="(item, index) in storage.record[currY][currM]?.items">
+          <div class="w-100% f-c-b">
+            <div class="f-c-s">
+              <el-tag size="small" class="mr-4" :type="item.type == '支' ? 'danger' : 'success'">
+                {{ item.type }}
+              </el-tag>
+              <div>
                 {{ item.text }}
               </div>
-              <div class="text-text-secondary">{{ item.cost }}</div>
             </div>
-            <template #dropdown>
+            <div class="text-text-secondary">{{ item.cost }}</div>
+          </div>
+          <template #dropdown>
+            <div class="m-2">
               <UpdateItem
-                class="my-2"
+                class="mb-2"
                 :record="storage.record"
                 :index="index"
                 :curr-y="currY"
                 :curr-m="currM"
                 @updated="recountR" />
               <DeleteItem
-                class="my-2"
                 :record="storage.record"
                 :index="index"
                 :curr-y="currY"
                 :curr-m="currM"
                 @deleted="recountR" />
-            </template>
-          </el-dropdown>
-        </div>
+            </div>
+          </template>
+        </el-dropdown>
       </div>
     </div>
   </div>

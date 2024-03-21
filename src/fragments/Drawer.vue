@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { UploadProps } from "element-plus";
-import { generateDate } from "@/utils/date-util";
+import { generateDate } from "@/utils";
 import { getStorage } from "@/apis";
 
 function exportJson() {
   const blob = new Blob([JSON.stringify(getStorage().value)], { type: "text/json" });
   const a = document.createElement("a");
   const date = generateDate();
-  a.download = `${date.year}-${date.month}-${date.day}${date.hour}${date.minute}${date.second}.json`;
+  a.download = `${date.y}-${date.m}-${date.d}${date.h}${date.minute}${date.second}.json`;
   a.href = URL.createObjectURL(blob);
   a.click();
 }
