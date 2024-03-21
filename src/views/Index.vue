@@ -1,93 +1,85 @@
 <script setup lang="ts">
 import {
-  getCurrYMs,
-  getStorageData,
-  setLastViewdDate,
-  ensureHasCurrR,
-  getSpendingOfCurrM,
-  getSurplusOfCurrR,
+  getMs,
+  getYs,
+  getStorage,
+  setViewdDate,
+  safetyR,
+  getSpendingOfM,
+  getSurplusOfR,
   getSpendingIncreasesPercentage
 } from "@/apis";
-import { getCurrY, getCurrM } from "@/utils";
+import { getCurrY, getCurrM, hasProperties } from "@/utils";
 
-const stroage = getStorageData();
+const storage = getStorage();
 const drawer = ref(false);
-const currY = ref(getCurrY());
-const currM = ref(getCurrM());
-const currYMs = ref([]);
-const allY = ref([]);
+const currY = ref(storage.value.viewdDate.year);
+const currM = ref(storage.value.viewdDate.month);
+const currMs = ref([]);
+const yList = ref([]);
 
 function deleteR() {
-  if (currYMs.value.length > 1) {
-    currYMs.value = currYMs.value.filter(i => i != currM.value);
-    currM.value = currYMs.value[0];
-    Reflect.deleteProperty(stroage.value.record[currY.value], currM.value);
+  if (currMs.value.length > 1) {
+    Reflect.deleteProperty(storage.value.record[currY.value], currM.value);
+    currMs.value = currMs.value.filter(i => i != currM.value);
+    currM.value = currMs.value[0];
   } else {
-    if (allY.value.length > 1) {
-      allY.value = allY.value.filter(i => i.value !== currY.value);
-      Reflect.deleteProperty(stroage.value, currY.value);
-      currY.value = allY.value[0].value;
-      currM.value = getCurrYMs(stroage.value.record, currY.value)[0];
+    if (yList.value.length > 1) {
+      Reflect.deleteProperty(storage.value.record, currY.value);
+      yList.value = yList.value.filter(i => i !== currY.value);
+      currY.value = yList.value[0];
+      currMs.value = getMs(storage.value.record, currY.value);
+      currM.value = currMs.value[0];
     } else {
       ElMessage.error("至少保留一个记录！");
     }
   }
 
-  currYMs.value = getCurrYMs(stroage.value.record, currY.value);
-  setLastViewdDate(currY.value, currM.value);
-  loadR();
+  setViewdDate(storage.value, currY.value, currM.value);
+  recountR();
 }
 
-function loadYoptions() {
-  return Object.keys(stroage.value.record).map(year => ({
-    value: year,
-    label: `${year} 年`
-  }));
+function onCurrYChange() {
+  currMs.value = getMs(storage.value.record, currY.value);
+  currM.value = currMs.value[0];
+  setViewdDate(storage.value, currY.value, currM.value);
+  recountR();
 }
 
-function changeCurrY() {
-  currYMs.value = getCurrYMs(stroage.value.record, currY.value);
-  currM.value = currYMs.value[0];
-  setLastViewdDate(currY.value, currM.value);
-  loadR();
-}
-
-function changeCurrM() {
-  currYMs.value = getCurrYMs(stroage.value.record, currY.value);
-  setLastViewdDate(currY.value, currM.value);
-  loadR();
+function onCurrMChange() {
+  currMs.value = getMs(storage.value.record, currY.value);
+  setViewdDate(storage.value, currY.value, currM.value);
+  recountR();
 }
 
 onBeforeMount(() => {
-  const viewdDate = stroage.value.viewdDate;
-  currYMs.value = getCurrYMs(stroage.value.record, currY.value);
-
-  if (Object.keys(viewdDate).length == 0) {
-    ensureHasCurrR(stroage.value.record, currY.value, currM.value);
-    setLastViewdDate(currY.value, currM.value);
+  const viewdDate = storage.value.viewdDate;
+  if (!hasProperties(viewdDate)) {
+    currY.value = getCurrY();
+    currM.value = getCurrM();
+    safetyR(storage.value.record, currY.value, currM.value);
   } else {
-    currY.value = viewdDate.year;
-    currM.value = viewdDate.month;
-    ensureHasCurrR(stroage.value.record, viewdDate.year, viewdDate.month);
+    currY.value = storage.value.viewdDate.year;
+    currM.value = storage.value.viewdDate.month;
   }
-
-  allY.value = loadYoptions();
+  currMs.value = getMs(storage.value.record, currY.value);
+  yList.value = getYs(storage.value.record);
 });
 
 function afterCreatedR() {
-  currYMs.value = getCurrYMs(stroage.value.record, currY.value);
-  allY.value = loadYoptions();
+  currMs.value = getMs(storage.value.record, currY.value);
+  yList.value = getYs(storage.value.record);
 }
 
 const percent = ref(0);
 
-function loadR() {
-  for (let i = 0; i < currYMs.value.length; i++) {
-    const surplus = getSurplusOfCurrR(stroage.value.record, currY.value, currYMs.value[i]);
-    stroage.value.record[currY.value][currYMs.value[i]].surplus = surplus;
+function recountR() {
+  for (let i = 0; i < currMs.value.length; i++) {
+    const surplus = getSurplusOfR(storage.value.record, currY.value, currMs.value[i]);
+    storage.value.record[currY.value][currMs.value[i]].surplus = surplus;
   }
   percent.value = Number(
-    getSpendingIncreasesPercentage(stroage.value.record, currY.value, currM.value).toFixed(2)
+    getSpendingIncreasesPercentage(storage.value.record, currY.value, currM.value).toFixed(2)
   );
 }
 </script>
@@ -100,18 +92,18 @@ function loadR() {
           <div class="i-tabler-menu"></div>
         </template>
       </el-button>
-      <el-button size="small" plain round @click="loadR">
+      <el-button size="small" plain round @click="recountR">
         <template #icon>
           <div class="i-tabler-refresh"></div>
         </template>
       </el-button>
     </div>
     <div class="f-c-b mt-6">
-      <el-select class="mr-4" @change="changeCurrY" v-model="currY">
-        <el-option v-for="item in allY" :key="item.label" :label="item.label" :value="item.value" />
+      <el-select class="mr-4" @change="onCurrYChange" v-model="currY">
+        <el-option v-for="item in yList" :key="item" :label="item + '年'" :value="item" />
       </el-select>
-      <el-select @change="changeCurrM" v-model="currM">
-        <el-option v-for="item in currYMs" :key="item + '月'" :label="item + '月'" :value="item" />
+      <el-select @change="onCurrMChange" v-model="currM">
+        <el-option v-for="item in currMs" :key="item + '月'" :label="item + '月'" :value="item" />
       </el-select>
     </div>
     <div class="f-c-s mt-4">
@@ -127,9 +119,9 @@ function loadR() {
       <CreateRecord
         class="ml-4"
         @on-created="afterCreatedR"
-        :record="stroage.record"
-        :curr-year="currY" />
-      <UpdateRecord class="ml-4" :record="stroage.record" :curr-year="currY" :curr-month="currM" />
+        :record="storage.record"
+        :curr-y="currY" />
+      <UpdateRecord class="ml-4" :record="storage.record" :curr-y="currY" :curr-m="currM" />
     </div>
     <div class="mt-2">
       <div>
@@ -139,23 +131,23 @@ function loadR() {
               <div class="i-tabler-coin-yen text-text-secondary mr-1"></div>
               <span class="text-text-secondary mr-1">预算</span>
               <span>
-                {{ stroage.record[currY][currM].budget }}
+                {{ storage.record[currY][currM]?.budget }}
               </span>
               <span class="text-text-secondary mr-1">，剩余</span>
-              <span v-if="stroage.record[currY][currM].surplus >= 0" class="text-green">
-                {{ stroage.record[currY][currM].surplus }}
+              <span v-if="storage.record[currY][currM]?.surplus >= 0" class="text-green">
+                {{ storage.record[currY][currM].surplus }}
               </span>
-              <span v-else class="text-red">{{ stroage.record[currY][currM].surplus }}</span>
+              <span v-else class="text-red">{{ storage.record[currY][currM]?.surplus }}</span>
             </div>
           </div>
-          <AddItem :record="stroage.record" :curr-year="currY" :curr-month="currM" @added="loadR" />
+          <AddItem :record="storage.record" :curr-y="currY" :curr-m="currM" @added="recountR" />
         </div>
         <div class="f-c-e text-0.8rem text-text-regular">
           <div class="f-c-c">
             <div class="i-tabler-map-south text-text-secondary mr-1"></div>
             <span class="text-text-secondary mr-1">支出</span>
             <span>
-              {{ getSpendingOfCurrM(stroage.record, currY, currM) }}
+              {{ getSpendingOfM(storage.record, currY, currM) }}
             </span>
           </div>
           <span class="text-text-secondary mr-1">，比上月</span>
@@ -172,7 +164,9 @@ function loadR() {
       <div class="mt-4">
         <div
           class="mt-20"
-          v-if="!(stroage.record[currY][currM].items && stroage.record[currY][currM].items.length)">
+          v-if="
+            !(storage.record[currY][currM]?.items && storage.record[currY][currM]?.items.length)
+          ">
           <el-result icon="info" title="提示">
             <template #sub-title>
               <p>没有收支记录</p>
@@ -180,7 +174,7 @@ function loadR() {
           </el-result>
         </div>
         <div
-          v-for="(item, index) in stroage.record[currY][currM].items"
+          v-for="(item, index) in storage.record[currY][currM]?.items"
           class="w-100% bg-bg-overlay p-4 rd-2 mt-2">
           <el-dropdown trigger="click" class="w-100%">
             <div class="w-100% f-c-b">
@@ -195,18 +189,18 @@ function loadR() {
             <template #dropdown>
               <UpdateItem
                 class="my-2"
-                :record="stroage.record"
-                :item-index="index"
-                :curr-year="currY"
-                :curr-month="currM"
-                @updated="loadR" />
+                :record="storage.record"
+                :index="index"
+                :curr-y="currY"
+                :curr-m="currM"
+                @updated="recountR" />
               <DeleteItem
                 class="my-2"
-                :record="stroage.record"
-                :item-index="index"
-                :curr-year="currY"
-                :curr-month="currM"
-                @deleted="loadR" />
+                :record="storage.record"
+                :index="index"
+                :curr-y="currY"
+                :curr-m="currM"
+                @deleted="recountR" />
             </template>
           </el-dropdown>
         </div>

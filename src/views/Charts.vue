@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { useEcharts } from "@/hooks/use-echarts";
-import { getStorageData, getCurrYMs } from "@/apis";
+import { getStorage, getMs } from "@/apis";
 import { getCurrY } from "@/utils";
 
-const storage = getStorageData();
+const storage = getStorage();
 const currYear = ref(getCurrY());
 const recordChartRef = shallowRef();
 
 function init() {
-  const viewdDate = getStorageData().value.viewdDate;
+  const viewdDate = getStorage().value.viewdDate;
   currYear.value = viewdDate.year;
 
   const currRecord = storage.value.record[currYear.value];
@@ -25,7 +25,7 @@ function init() {
     seriesData.push(costs);
   }
 
-  const xAxisData = getCurrYMs(storage.value.record, currYear.value);
+  const xAxisData = getMs(storage.value.record, currYear.value);
 
   useEcharts({
     dom: recordChartRef.value,

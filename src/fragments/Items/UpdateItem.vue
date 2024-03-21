@@ -3,22 +3,22 @@ import { PropType } from "vue";
 import { Coin, ChatDotRound } from "@element-plus/icons-vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { formValidator, validateMoney } from "@/utils/form-util";
-import { getStorageData } from "@/apis";
+import { getStorage } from "@/apis";
 
 const props = defineProps({
   record: {
     type: Object as PropType<IRecord>,
     required: true
   },
-  currYear: {
+  currY: {
     type: String,
     required: true
   },
-  currMonth: {
+  currM: {
     type: String,
     required: true
   },
-  itemIndex: {
+  index: {
     type: Number,
     required: true
   }
@@ -36,9 +36,9 @@ const formRule = ref<FormRules>({
   ]
 });
 const formData = ref<IItems>({
-  ...props.record[props.currYear][props.currMonth].items[props.itemIndex]
+  ...props.record[props.currY][props.currM].items[props.index]
 });
-const storage = getStorageData();
+const storage = getStorage();
 
 const findFromComments = (target: any, callback: any) => {
   const remark = target
@@ -54,11 +54,11 @@ const createFilter = (target: any) => {
 };
 
 function onAutocompleteSelected(remark: IComments) {
-  props.record[props.currYear][props.currMonth].items[props.itemIndex].cost = remark.cost;
+  props.record[props.currY][props.currM].items[props.index].cost = remark.cost;
 }
 
 function openUpdateDialog() {
-  formData.value = { ...props.record[props.currYear][props.currMonth].items[props.itemIndex] };
+  formData.value = { ...props.record[props.currY][props.currM].items[props.index] };
   dialog.value = !dialog.value;
 }
 
@@ -67,12 +67,12 @@ function confirmSubmit() {
     formInst.value,
     () => {
       dialog.value = !dialog.value;
-      props.record[props.currYear][props.currMonth].items[props.itemIndex] = {
-        ...props.record[props.currYear][props.currMonth].items[props.itemIndex],
+      props.record[props.currY][props.currM].items[props.index] = {
+        ...props.record[props.currY][props.currM].items[props.index],
         ...formData.value
       };
-      ElMessage.success("修改成功！");
       emits("updated");
+      ElMessage.success("修改成功！");
     },
     () => {
       ElMessage.error("修改失败！检查输入的值是否正确");

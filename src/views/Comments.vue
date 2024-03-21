@@ -2,9 +2,9 @@
 import { Coin, ChatDotRound } from "@element-plus/icons-vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { formValidator, validateMoney } from "@/utils/form-util";
-import { getStorageData } from "@/apis";
+import { getStorage } from "@/apis";
 
-const storage = getStorageData();
+const storage = getStorage();
 const editCommentsRow = ref<IComments>();
 const delCommentsDialog = ref(false);
 const commentsEditType = ref<"新增" | "更新">("新增");
@@ -199,10 +199,10 @@ function beforeCreateRemark() {
         <div class="f-c-c">
           <el-button class="mr-4" plain round type="danger" @click="confirmDelComments">
             <template #icon>
-              <div class="i-tabler-check"></div>
+              <div class="i-tabler-trash"></div>
             </template>
           </el-button>
-          <el-button plain round @click="delCommentsDialog = false">
+          <el-button plain round type="primary" @click="delCommentsDialog = false">
             <template #icon>
               <div class="i-tabler-x"></div>
             </template>

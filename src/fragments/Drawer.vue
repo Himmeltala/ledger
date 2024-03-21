@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { UploadProps } from "element-plus";
 import { generateDate } from "@/utils/date-util";
-import { getStorageData } from "@/apis";
+import { getStorage } from "@/apis";
 
 function exportJson() {
-  const blob = new Blob([JSON.stringify(getStorageData().value)], { type: "text/json" });
+  const blob = new Blob([JSON.stringify(getStorage().value)], { type: "text/json" });
   const a = document.createElement("a");
   const date = generateDate();
   a.download = `${date.year}-${date.month}-${date.day}${date.hour}${date.minute}${date.second}.json`;
@@ -18,7 +18,7 @@ const importJson: UploadProps["onChange"] = async file => {
     reader.readAsText(file.raw);
     reader.onload = () => {
       const result = JSON.parse(reader.result.toString());
-      getStorageData().value = result;
+      getStorage().value = result;
     };
   }
 };

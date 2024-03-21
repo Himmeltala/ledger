@@ -20,7 +20,7 @@ declare interface IItems {
   sameat?: ISameat;
 }
 
-declare type ISameat = { value: any; index: number }[];
+declare type ISameat = number[] | string[];
 
 declare interface IMonth {
   items?: IItems[];

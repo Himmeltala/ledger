@@ -3,18 +3,18 @@ import { PropType } from "vue";
 import { Coin, ChatDotRound } from "@element-plus/icons-vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { formValidator, validateMoney } from "@/utils/form-util";
-import { getCurrYMs, getStorageData } from "@/apis";
+import { getMs, getStorage } from "@/apis";
 
 const props = defineProps({
   record: {
     type: Object as PropType<IRecord>,
     required: true
   },
-  currYear: {
+  currY: {
     type: String,
     required: true
   },
-  currMonth: {
+  currM: {
     type: String,
     required: true
   }
@@ -22,13 +22,13 @@ const props = defineProps({
 
 const emits = defineEmits(["added"]);
 
-const storage = getStorageData();
+const storage = getStorage();
 const dialog = ref(false);
-const formData = ref<IItems & { sameness: string[] }>({
+const formData = ref<IItems>({
   cost: 100,
   text: "",
   type: "支",
-  sameness: []
+  sameat: []
 });
 const formInst = ref<FormInstance>();
 const formRule = ref<FormRules>({
@@ -39,30 +39,20 @@ const formRule = ref<FormRules>({
   ]
 });
 
-function storeRecord(lastIndx: ISameat) {
-  for (let i = 0; i < lastIndx.length; i++) {
-    const month = props.record[props.currYear][lastIndx[i].value];
-    if (!month.items) month.items = [];
-    month.items.push({
-      cost: formData.value.cost,
-      text: formData.value.text,
-      type: formData.value.type,
-      sameat: lastIndx
-    });
-  }
-}
-
 function confirmSubmit() {
   formValidator(
     formInst.value,
     () => {
-      const lastIndx: ISameat = [];
-      for (let i = 0; i < formData.value.sameness.length; i++) {
-        const items = props.record[props.currYear][formData.value.sameness[i]].items;
-        if (!items) lastIndx.push({ value: formData.value.sameness[i], index: 0 });
-        else lastIndx.push({ value: formData.value.sameness[i], index: items.length });
+      for (let i = 0; i < formData.value.sameat.length; i++) {
+        const m = props.record[props.currY][formData.value.sameat[i]];
+        if (!m.items) m.items = [];
+        m.items.push({
+          cost: formData.value.cost,
+          text: formData.value.text,
+          type: formData.value.type,
+          sameat: formData.value.sameat
+        });
       }
-      storeRecord(lastIndx);
       dialog.value = !dialog.value;
       ElMessage.success("添加成功！");
       emits("added");
@@ -92,14 +82,7 @@ function onAutocompleteSelected(remark: IComments) {
   formData.value.type = remark.type;
 }
 
-const sameatOps = ref([]);
-
 function openAddDialog() {
-  sameatOps.value = [];
-  formData.value.sameness = [storage.value.viewdDate.month];
-  getCurrYMs(props.record, props.currYear).forEach(value => {
-    sameatOps.value.push(value);
-  });
   dialog.value = !dialog.value;
 }
 </script>
@@ -145,16 +128,11 @@ function openAddDialog() {
             <el-radio v-for="item in ['支', '收']" :label="item" :value="item"></el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="连同">
-          <el-checkbox-group v-model="formData.sameness">
-            <template v-for="item in sameatOps">
-              <el-checkbox
-                v-if="item == currMonth"
-                checked
-                disabled
-                :label="item + '月'"
-                :value="item" />
-              <el-checkbox v-else :label="item + '月'" :value="item" />
+        <el-form-item label="连同" prop="sameat">
+          <el-checkbox-group v-model="formData.sameat">
+            <template v-for="i in getMs(record, currY)">
+              <el-checkbox v-if="i == currM" checked disabled :label="i + '月'" :value="i" />
+              <el-checkbox v-else :label="i + '月'" :value="i" />
             </template>
           </el-checkbox-group>
         </el-form-item>

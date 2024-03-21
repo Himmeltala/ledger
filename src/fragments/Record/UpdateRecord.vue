@@ -9,11 +9,11 @@ const props = defineProps({
     type: Object as PropType<IRecord>,
     required: true
   },
-  currYear: {
+  currY: {
     type: String,
     required: true
   },
-  currMonth: {
+  currM: {
     type: String,
     required: true
   }
@@ -24,10 +24,10 @@ const formInst = ref<FormInstance>();
 const formRule = ref<FormRules>({
   budget: [{ validator: validateMoney, trigger: "change" }]
 });
-const formData = ref<IMonth>({ ...props.record[props.currYear][props.currMonth] });
+const formData = ref<IMonth>({ ...props.record[props.currY][props.currM] });
 
 function openUpdateDialog() {
-  formData.value = { ...props.record[props.currYear][props.currMonth] };
+  formData.value = { ...props.record[props.currY][props.currM] };
   dialog.value = !dialog.value;
 }
 
@@ -36,8 +36,8 @@ function confirmSubmit() {
     formInst.value,
     () => {
       dialog.value = !dialog.value;
-      props.record[props.currYear][props.currMonth] = {
-        ...props.record[props.currYear][props.currMonth],
+      props.record[props.currY][props.currM] = {
+        ...props.record[props.currY][props.currM],
         ...formData.value
       };
       ElMessage.success("更新成功！");

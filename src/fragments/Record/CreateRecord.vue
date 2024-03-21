@@ -6,7 +6,7 @@ import { formValidator } from "@/utils/form-util";
 import { setR } from "@/apis";
 
 const props = defineProps({
-  currYear: {
+  currY: {
     type: String,
     required: true
   },
@@ -20,7 +20,7 @@ const emits = defineEmits(["onCreated"]);
 
 const dialog = ref(false);
 const formData = ref({
-  year: props.currYear,
+  year: props.currY,
   month: "1月",
   budget: 5000
 });
@@ -33,7 +33,8 @@ function confirmSubmit() {
     () => {
       setR(props.record, formData.value.year, formData.value.month.split("月")[0], {
         budget: formData.value.budget,
-        surplus: 0
+        surplus: 0,
+        items: []
       })
         .then(() => {
           ElMessage.success("创建记录成功！");
@@ -59,13 +60,17 @@ for (let i = 0; i < 12; i++) {
 <template>
   <div>
     <el-button plain round size="small" type="primary" @click="dialog = !dialog">创建</el-button>
-    <el-dialog append-to-body width="90%" v-model="dialog" title="创建记录">
+    <el-dialog
+      append-to-body
+      width="90%"
+      v-model="dialog"
+      title="创建记录"
+      @opened="formInst.resetFields()">
       <el-form
         ref="formInst"
         :model="formData"
         :rules="formRule"
         status-icon
-        @opened="formInst.resetFields()"
         hide-required-asterisk
         label-position="left">
         <el-form-item label="年份" prop="year">

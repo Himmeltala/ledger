@@ -1,11 +1,13 @@
-export function getStorageData() {
+import { getCurrM, getCurrY } from "@/utils";
+
+export function getStorage() {
   return useStorage<IStorageData>("ledger-data", { comments: [], record: {}, viewdDate: {} });
 }
 
 /**
- * 确保存在当月记录
+ * 安全获取记录，若不存在该记录就创建该记录，通常在第一次进入应用没有存储数据的时候使用该函数。
  */
-export function ensureHasCurrR(record: IRecord, currY: string, currM: string) {
+export function safetyR(record: IRecord, currY: string | number, currM: string) {
   try {
     record[currY][currM];
   } catch (e) {
@@ -20,15 +22,15 @@ export function ensureHasCurrR(record: IRecord, currY: string, currM: string) {
 }
 
 /**
- * 若没有去年最后一个月的结余，返回0，否则返回实际结余
+ * 获取去年最后一个月的结余，若没有则返回 0。
  */
-export function ensureHasPrevYLastRSurplus(record: IRecord, currY: string) {
-  const prevY = Number(currY) - 1 + "";
-  const prevYMs = getCurrYMs(record, prevY);
+export function getPrevYEndRSurplus(record: IRecord, currY: string) {
+  const prevY = Number(currY) - 1;
+  const prevMs = record[prevY] ? Object.keys(record[prevY]) : null;
 
-  if (prevYMs && prevYMs.length) {
-    const prevYEndName = prevYMs[prevYMs.length - 1];
-    const prevYEndR = getR(record, prevY, prevYEndName);
+  if (prevMs && prevMs.length) {
+    const prevYEndM = prevMs[prevMs.length - 1];
+    const prevYEndR = getR(record, prevY, prevYEndM);
     return prevYEndR.surplus;
   } else {
     return 0;
@@ -38,99 +40,79 @@ export function ensureHasPrevYLastRSurplus(record: IRecord, currY: string) {
 /**
  * 若没有去年最后一个月，返回0，否则返回最后一个月
  */
-export function ensureHasPrevYLastR(record: IRecord, currY: string) {
-  const prevY = Number(currY) - 1 + "";
-  const prevYMs = getCurrYMs(record, prevY);
+export function getPrevYEndR(record: IRecord, currY: string) {
+  const prevY = Number(currY) - 1;
+  const prevYMs = record[prevY] ? Object.keys(record[prevY]) : null;
 
   if (prevYMs && prevYMs.length) {
-    const prevYEndName = prevYMs[prevYMs.length - 1];
-    const prevYEndR = getR(record, prevY, prevYEndName);
+    const prevYEndM = prevYMs[prevYMs.length - 1];
+    const prevYEndR = getR(record, prevY, prevYEndM);
     return prevYEndR;
   } else {
     return null;
   }
 }
 
-export function ensureHasPrevYLastROutcome(record: IRecord, currY: string) {
-  const prevY = Number(currY) - 1 + "";
-  const prevYMs = getCurrYMs(record, prevY);
-
-  if (prevYMs && prevYMs.length) {
-  } else {
-    return 0;
-  }
-}
-
 /**
  * 获取指定年、指定月的账单
  */
-export function getR(record: IRecord, currY: string, currM: string) {
-  ensureHasCurrR(record, currY, currM);
+export function getR(record: IRecord, currY: string | number, currM: string) {
+  safetyR(record, currY, currM);
   return record[currY][currM];
 }
 
 /**
- * 获取当月的总支出
+ * 获取当月的支出
  */
 export function getOutcome(record: IRecord, currY: string, currM: string) {
-  let total = 0;
-
-  getR(record, currY, currM)?.items?.forEach(i => {
-    if (i.type === "支") {
-      total += Number(i.cost);
-    }
-  });
-
-  return total;
+  return (
+    getR(record, currY, currM)
+      ?.items?.filter(i => i.type === "支")
+      ?.reduce((accumulator, currentValue) => accumulator + Number(currentValue.cost), 0) || 0
+  );
 }
 
 /**
- * 获取当月的总收入
+ * 获取上个月的支出
+ */
+export function getPrevOutcome(record: IRecord, currY: string, currM: string, MList: string[]) {
+  return (
+    getPrevR(record, currY, MList, currM)
+      ?.items?.filter(i => i.type === "支")
+      ?.reduce((accumulator, currentValue) => accumulator + Number(currentValue.cost), 0) || 0
+  );
+}
+
+/**
+ * 获取当月的收入
  */
 export function getIncome(record: IRecord, currY: string, currM: string) {
-  let total = 0;
-
-  getR(record, currY, currM)?.items?.forEach(i => {
-    if (i.type === "收") {
-      total += Number(i.cost);
-    }
-  });
-
-  return total;
-}
-
-export function getPrevOutcome(record: IRecord, currY: string, currK: string, allK: string[]) {
-  let total = 0;
-
-  getPrevR(record, currY, allK, currK)?.items?.forEach(i => {
-    if (i.type === "支") {
-      total += Number(i.cost);
-    }
-  });
-
-  return total;
+  return (
+    getR(record, currY, currM)
+      ?.items?.filter(i => i.type === "收")
+      ?.reduce((accumulator, currentValue) => accumulator + Number(currentValue.cost), 0) || 0
+  );
 }
 
 /**
- * 获取指定年所有月的索引值
+ * 获取指定年所有月的索引
  */
-export function getCurrYMs(record: IRecord, currY: string) {
-  return Object.keys(record[currY] || []);
+export function getMs(record: IRecord, currY: string | number) {
+  return record[currY] ? Object.keys(record[currY]) : [getCurrM()];
+}
+
+/**
+ * 获取所有年的索引
+ */
+export function getYs(record: IRecord) {
+  return record ? Object.keys(record) : [getCurrY()];
 }
 
 /**
  * 判断指定月是不是第一个月
  */
-export function isHeadM(keys: string[], names: string) {
-  let isFirst = false;
-
-  keys.forEach((i, idx) => {
-    if (names == i && idx == 0) {
-      isFirst = true;
-    }
-  });
-
-  return isFirst;
+export function isHeadM(mList: string[], currM: string) {
+  return mList.indexOf(currM) === 0;
 }
 
 /**
@@ -139,12 +121,12 @@ export function isHeadM(keys: string[], names: string) {
 export function getPrevR(
   record: IRecord,
   currY: string,
-  allK: string[],
-  currK: string
+  MList: string[],
+  currM: string
 ): IMonth | null {
-  const isCurrName = allK.findIndex(name => name == currK);
+  const isCurrName = MList.findIndex(m => m == currM);
   if (isCurrName != -1) {
-    return record[currY][allK[isCurrName - 1]];
+    return record[currY][MList[isCurrName - 1]];
   } else return null;
 }
 
@@ -152,16 +134,15 @@ export function getPrevR(
  * 获取当年当月的剩余金额（包括上月结余）
  * @returns 返回计算的当年当月的剩余金额（+上月结余）
  */
-export function getSurplusOfCurrR(record: IRecord, currY: string, currK: string) {
+export function getSurplusOfR(record: IRecord, currY: string, currK: string) {
   let surplus = 0;
-  const currYMs = getCurrYMs(record, currY);
+  const currYMs = getMs(record, currY);
   const currR = getR(record, currY, currK);
   const currOutcome = getOutcome(record, currY, currK);
   const currIncome = getIncome(record, currY, currK);
 
   if (isHeadM(currYMs, currK)) {
-    surplus =
-      Number(currR.budget) - currOutcome + currIncome + ensureHasPrevYLastRSurplus(record, currY);
+    surplus = Number(currR.budget) - currOutcome + currIncome + getPrevYEndRSurplus(record, currY);
   } else {
     const prevR = getPrevR(record, currY, currYMs, currK);
     if (prevR && currR) {
@@ -169,20 +150,17 @@ export function getSurplusOfCurrR(record: IRecord, currY: string, currK: string)
     }
   }
 
-  surplus = Number(surplus.toFixed(2));
-  currR.surplus = surplus;
-
-  return surplus;
+  return Number(surplus.toFixed(2));
 }
 
 export function getSpendingIncreasesPercentage(record: IRecord, currY: string, currK: string) {
-  const currYMs = getCurrYMs(record, currY);
+  const currMs = getMs(record, currY);
   let currROutcome = 0,
     prevROutcome = 0;
   currROutcome = getOutcome(record, currY, currK);
 
-  if (isHeadM(currYMs, currK)) {
-    const has = ensureHasPrevYLastR(record, currY);
+  if (isHeadM(currMs, currK)) {
+    const has = getPrevYEndR(record, currY);
     if (has) {
       let total = 0;
       has.items?.forEach(i => {
@@ -195,7 +173,7 @@ export function getSpendingIncreasesPercentage(record: IRecord, currY: string, c
       prevROutcome = 0;
     }
   } else {
-    prevROutcome = getPrevOutcome(record, currY, currK, currYMs);
+    prevROutcome = getPrevOutcome(record, currY, currK, currMs);
   }
   return prevROutcome ? ((currROutcome - prevROutcome) / prevROutcome) * 100 : 0;
 }
@@ -203,16 +181,8 @@ export function getSpendingIncreasesPercentage(record: IRecord, currY: string, c
 /**
  * 当前的月是否已经存在于所有月份中
  */
-export function hasExistInK(keys: string[], names: string): boolean {
-  let isExist = false;
-
-  keys?.forEach(n => {
-    if (names == n) {
-      isExist = true;
-    }
-  });
-
-  return isExist;
+export function isIn(ms: string[], m: string) {
+  return ms?.includes(m) || false;
 }
 
 /**
@@ -221,8 +191,8 @@ export function hasExistInK(keys: string[], names: string): boolean {
 export function setR(record: IRecord, currY: string, currM: string, data: IMonth) {
   return new Promise((resolve, reject) => {
     if (record[currY]) {
-      const currYMs = getCurrYMs(record, currY);
-      if (!hasExistInK(currYMs, currM)) {
+      const currMs = getMs(record, currY);
+      if (!isIn(currMs, currM)) {
         record[currY][currM] = data;
         resolve("");
       } else {
@@ -240,24 +210,18 @@ export function setR(record: IRecord, currY: string, currM: string, data: IMonth
 /**
  * 设置上一次预览的月账单
  */
-export function setLastViewdDate(currY: string, currM: string) {
-  getStorageData().value.viewdDate = {
-    year: currY,
-    month: currM
-  };
+export function setViewdDate(storage: IStorageData, currY: string, currM: string) {
+  storage.viewdDate = { year: currY, month: currM };
 }
 
-export function getSpendingOfCurrM(record: IRecord, currY: string, currM: string) {
+export function getSpendingOfM(record: IRecord, currY: string, currM: string) {
   const m = record[currY][currM];
-  let costs = 0;
 
   if (m?.items) {
-    m.items.map(i => {
-      if (i.type === "支") {
-        costs += Number(i.cost);
-      }
-    });
+    return m.items.reduce((total, item) => {
+      return item.type === "支" ? total + Number(item.cost) : total;
+    }, 0);
   }
 
-  return costs;
+  return 0;
 }
