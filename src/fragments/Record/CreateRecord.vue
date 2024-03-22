@@ -41,13 +41,9 @@ function confirmSubmit() {
           dialog.value = !dialog.value;
           emits("onCreated");
         })
-        .catch(() => {
-          ElMessage.error("已有该月记录！");
-        });
+        .catch(error => ElMessage.error(error.message));
     },
-    () => {
-      ElMessage.error("创建记录失败！");
-    }
+    () => ElMessage.error("创建记录失败！")
   );
 }
 

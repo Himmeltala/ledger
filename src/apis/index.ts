@@ -26,9 +26,9 @@ export function safetyR(record: IRecord, currY: string | number, currM: string) 
  */
 export function getPrevYEndRSurplus(record: IRecord, currY: string) {
   const prevY = Number(currY) - 1;
-  const prevMs = record[prevY] ? Object.keys(record[prevY]) : null;
+  const prevMs = record[prevY] ? Object.keys(record[prevY]) : [];
 
-  if (prevMs && prevMs.length) {
+  if (prevMs.length > 0) {
     const prevYEndM = prevMs[prevMs.length - 1];
     const prevYEndR = getR(record, prevY, prevYEndM);
     return prevYEndR.surplus;
@@ -42,9 +42,9 @@ export function getPrevYEndRSurplus(record: IRecord, currY: string) {
  */
 export function getPrevYEndR(record: IRecord, currY: string) {
   const prevY = Number(currY) - 1;
-  const prevYMs = record[prevY] ? Object.keys(record[prevY]) : null;
+  const prevYMs = record[prevY] ? Object.keys(record[prevY]) : [];
 
-  if (prevYMs && prevYMs.length) {
+  if (prevYMs.length > 0) {
     const prevYEndM = prevYMs[prevYMs.length - 1];
     const prevYEndR = getR(record, prevY, prevYEndM);
     return prevYEndR;
@@ -118,12 +118,7 @@ export function isHeadM(mList: string[], currM: string) {
 /**
  * 获取指定月的上一个月的账单
  */
-export function getPrevR(
-  record: IRecord,
-  currY: string,
-  MList: string[],
-  currM: string
-): IMonth | null {
+export function getPrevR(record: IRecord, currY: string, MList: string[], currM: string) {
   const isCurrName = MList.findIndex(m => m == currM);
   if (isCurrName != -1) {
     return record[currY][MList[isCurrName - 1]];
@@ -193,23 +188,21 @@ export function isIn(ms: string[], m: string) {
 /**
  * 设置月账单
  */
-export function setR(record: IRecord, currY: string, currM: string, data: IMonth) {
-  return new Promise((resolve, reject) => {
-    if (record[currY]) {
-      const currMs = getMs(record, currY);
-      if (!isIn(currMs, currM)) {
-        record[currY][currM] = data;
-        resolve("");
-      } else {
-        reject("");
-      }
+export async function setR(record: IRecord, currY: string, currM: string, data: IMonth) {
+  if (record[currY]) {
+    const currMs = getMs(record, currY);
+    if (!isIn(currMs, currM)) {
+      record[currY][currM] = data;
+      return;
     } else {
-      record[currY] = {
-        [currM]: data
-      };
-      resolve("");
+      throw new Error("已有该月记录！");
     }
-  });
+  } else {
+    record[currY] = {
+      [currM]: data
+    };
+    return;
+  }
 }
 
 /**
