@@ -41,7 +41,7 @@ function confirmSubmit() {
     formInst.value,
     async () => {
       props.data.items[props.currM].budget = Number(formData.budget);
-      await Database.put(props.database, Const.RECORD, Utils.Objects.raw(props.data), props.currY);
+      await Database.put(props.database, Const.DB_RECORD, Utils.Objects.raw(props.data), props.currY);
       dialog.value = !dialog.value;
     },
     () => {

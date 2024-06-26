@@ -6,7 +6,6 @@
 export {}
 declare global {
   const Const: typeof import('@/const/index')['Const']
-  const Consts: typeof import('@/consts/index')['Consts']
   const DataBase: typeof import('@/database/index')['DataBase']
   const Database: typeof import('@/database/index')['Database']
   const EffectScope: typeof import('vue')['EffectScope']

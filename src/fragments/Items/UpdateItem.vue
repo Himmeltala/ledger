@@ -41,13 +41,8 @@ const formRule = ref<FormRules>({
 const formData = ref<IBalance>({
   ...props.value
 });
-const comments = ref<IComment[]>([]);
-
-onMounted(() => {
-  Database.get<{ items: IComment[] }>(props.database, Const.COMMENTS, "0").then(r => {
-    comments.value = r.items;
-  });
-});
+const { items } = await Database.get<{ items: IComment[] }>(props.database, Const.DB_COMMENTS, Const.DB_KEY_COMMENTS);
+const comments = ref<IComment[]>(items);
 
 const findFromComments = (target: any, callback: any) => {
   const comment = target ? comments.value.filter(Utils.createFilter(target)) : comments.value;
@@ -68,7 +63,7 @@ function confirmSubmit() {
     formInst.value,
     async () => {
       props.data.items[props.currM].balance[props.index] = formData.value;
-      await Database.put(props.database, Const.RECORD, Utils.Objects.raw(props.data), props.currY);
+      await Database.put(props.database, Const.DB_RECORD, Utils.Objects.raw(props.data), props.currY);
       isShowDialog.value = !isShowDialog.value;
     },
     () => {

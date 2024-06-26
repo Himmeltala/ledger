@@ -29,8 +29,12 @@ function handleDelete() {
   const nextM = Utils.deleteAndReturnNext(props.mList, props.currM);
   if (nextM) {
     delete props.data.items[props.currM];
-    Database.put(props.database, Const.RECORD, Utils.Objects.raw(props.data), props.currY).then(() => {
-      Database.put(props.database, Const.VIEW_DATE, { id: "0", Y: props.currY, M: nextM }, "0");
+    Database.put(props.database, Const.DB_RECORD, Utils.Objects.raw(props.data), props.currY).then(() => {
+      Database.put(props.database, Const.DB_CONFIG, {
+        id: Const.DB_KEY_CONFIG,
+        Y: props.currY,
+        M: nextM
+      }, Const.DB_KEY_CONFIG);
       emits("onDeleted", nextM);
     });
   } else ElMessage.error("至少保留一条记录");

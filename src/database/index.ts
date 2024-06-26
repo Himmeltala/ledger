@@ -1,7 +1,7 @@
 export namespace Database {
   export function create(): Promise<IDBDatabase> {
     const promise = new Promise<IDBDatabase>((resolve, reject) => {
-      const req = indexedDB.open(Const.TALLY_PAD);
+      const req = indexedDB.open(Const.DB_TALLYPAD);
 
       req.onsuccess = function(event) {
         // @ts-ignore
@@ -16,13 +16,13 @@ export namespace Database {
       req.onupgradeneeded = function(event) {
         // @ts-ignore
         const db = event.target.result as IDBDatabase;
-        const record = db.createObjectStore(Const.RECORD, { keyPath: "id" });
-        const comments = db.createObjectStore(Const.COMMENTS, { keyPath: "id" });
-        const viewDate = db.createObjectStore(Const.VIEW_DATE, { keyPath: "id" });
+        const dbRecord = db.createObjectStore(Const.DB_RECORD, { keyPath: "id" });
+        const dbComments = db.createObjectStore(Const.DB_COMMENTS, { keyPath: "id" });
+        const dbConfig = db.createObjectStore(Const.DB_CONFIG, { keyPath: "id" });
 
-        record.add({ id: "2024", items: { "1": { balance: [], surplus: 0, budget: 0 } } });
-        comments.add({ id: "0", items: [{ value: "生活费", cost: 1800, type: "支" }] });
-        viewDate.add({ id: "0", Y: "2024", M: "1" });
+        dbRecord.add({ id: "2024", items: { "1": { balance: [], surplus: 0, budget: 0 } } });
+        dbComments.add({ id: Const.DB_KEY_COMMENTS, items: [{ value: "生活费", cost: 1800, type: "支" }] });
+        dbConfig.add({ id: Const.DB_KEY_CONFIG, Y: "2024", M: "1", budget: 5000, isChart: true });
       };
     });
 

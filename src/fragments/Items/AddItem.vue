@@ -35,20 +35,15 @@ const formRule = ref<FormRules>({
     { min: 1, max: 50, message: "长度在1~50个字符之间", trigger: "blur" }
   ]
 });
-const comments = ref<IComment[]>([]);
-
-onMounted(() => {
-  Database.get<{ items: IComment[] }>(props.database, Const.COMMENTS, "0").then(r => {
-    comments.value = r.items;
-  });
-});
+const { items } = await Database.get<{ items: IComment[] }>(props.database, Const.DB_COMMENTS, Const.DB_KEY_COMMENTS);
+const comments = ref<IComment[]>(items);
 
 function confirmSubmit() {
   Utils.Forms.formValidator(
     formInst.value,
     async () => {
       props.data.items[props.currM].balance.push({ ...formData.value });
-      await Database.put(props.database, Const.RECORD, Utils.Objects.raw(props.data), props.currY);
+      await Database.put(props.database, Const.DB_RECORD, Utils.Objects.raw(props.data), props.currY);
       dialog.value = !dialog.value;
     },
     () => {

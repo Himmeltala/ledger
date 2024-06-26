@@ -31,7 +31,7 @@ const isShowDialog = ref(false);
 
 async function confirmSubmit() {
   props.data.items[props.currM].balance.splice(props.index, 1);
-  await Database.put(props.database, Const.RECORD, Utils.Objects.raw(props.data), props.currY);
+  await Database.put(props.database, Const.DB_RECORD, Utils.Objects.raw(props.data), props.currY);
   isShowDialog.value = !isShowDialog.value;
 }
 </script>

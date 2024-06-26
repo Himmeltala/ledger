@@ -1,13 +1,15 @@
 <script lang="ts" setup>
 import DeleteRecord from "@/fragments/Record/DeleteRecord.vue";
+import { Utils } from "@/utils";
+import Objects = Utils.Objects;
 
 const database = await Database.create();
-const datetime = await Database.get<ViewDate>(database, Const.VIEW_DATE, "0");
-const currY = ref(datetime.Y);
-const currM = ref(datetime.M);
-const data = ref(await Database.get<IRecord>(database, Const.RECORD, currY.value));
+const config = await Database.get<IConfig>(database, Const.DB_CONFIG, Const.DB_KEY_CONFIG);
+const currY = ref(config.Y);
+const currM = ref(config.M);
+const data = ref(await Database.get<IRecord>(database, Const.DB_RECORD, currY.value));
 const MList = ref(Object.keys(data.value.items));
-const YList = ref<string[]>(await Database.keys(database, Const.RECORD));
+const YList = ref<string[]>(await Database.keys(database, Const.DB_RECORD));
 const risingRate = ref(0);
 
 function calcGrowthRate() {
@@ -51,7 +53,7 @@ function calcSurplus() {
 
   const total = calcOutAndInTotalCost(data.value.items[currM.value].balance);
   data.value.items[currM.value].surplus = Number((data.value.items[currM.value].budget - total));
-  Database.put(database, Const.RECORD, Utils.Objects.raw(data.value), currY.value).then(() => {
+  Database.put(database, Const.DB_RECORD, Utils.Objects.raw(data.value), currY.value).then(() => {
     risingRate.value = calcGrowthRate();
   });
 
@@ -74,8 +76,10 @@ function calcOutcome() {
 }
 
 function onCurrYChange() {
-  Database.put(database, Const.VIEW_DATE, { id: "0", Y: currY.value, M: currM.value }, "0");
-  Database.get<IRecord>(database, Const.RECORD, currY.value).then(_data => {
+  config.Y = currY.value;
+  config.M = currM.value;
+  Database.put(database, Const.DB_CONFIG, Objects.raw(config), Const.DB_KEY_CONFIG);
+  Database.get<IRecord>(database, Const.DB_RECORD, currY.value).then(_data => {
     data.value = _data;
     MList.value = Object.keys(data.value.items);
     currM.value = MList.value[0];
@@ -83,25 +87,31 @@ function onCurrYChange() {
 }
 
 function onCurrMChange() {
-  Database.put(database, Const.VIEW_DATE, { id: "0", Y: currY.value, M: currM.value }, "0");
+  config.Y = currY.value;
+  config.M = currM.value;
+  Database.put(database, Const.DB_CONFIG, Objects.raw(config), Const.DB_KEY_CONFIG);
 }
 
 async function onCreatedR(nextY: string) {
-  Database.get<IRecord>(database, Const.RECORD, nextY).then(_data => {
+  Database.get<IRecord>(database, Const.DB_RECORD, nextY).then(_data => {
     data.value = _data;
-    Database.keys(database, Const.RECORD).then(_YList => {
+    Database.keys(database, Const.DB_RECORD).then(_YList => {
       YList.value = _YList;
       currY.value = nextY;
       MList.value = Object.keys(data.value.items);
       currM.value = MList.value[0];
-      Database.put(database, Const.VIEW_DATE, { id: "0", Y: currY.value, M: currM.value }, "0");
+      config.Y = currY.value;
+      config.M = currM.value;
+      Database.put(database, Const.DB_CONFIG, Objects.raw(config), Const.DB_KEY_CONFIG);
     });
   });
 }
 
 function onDeletedR(nextM: string) {
   currM.value = nextM;
-  Database.put(database, Const.VIEW_DATE, { id: "0", Y: currY.value, M: currM.value }, "0");
+  config.Y = currY.value;
+  config.M = currM.value;
+  Database.put(database, Const.DB_CONFIG, Objects.raw(config), Const.DB_KEY_CONFIG);
 }
 </script>
 

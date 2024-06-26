@@ -2,8 +2,8 @@
 import { useEcharts } from "@/hooks/use-echarts";
 
 const database = await Database.create();
-const datetime = await Database.get<ViewDate>(database, Const.VIEW_DATE, "0");
-const data = ref(await Database.get<IRecord>(database, Const.RECORD, datetime.Y));
+const config = await Database.get<IConfig>(database, Const.DB_CONFIG, Const.DB_KEY_CONFIG);
+const data = ref(await Database.get<IRecord>(database, Const.DB_RECORD, config.Y));
 
 function group(data: any) {
   const grouped: { [type: string]: { [text: string]: any[] } } = {};
@@ -107,6 +107,10 @@ function formatData(data: any, max = 36) {
 }
 
 onMounted(() => {
+  if (!config.isChart) {
+    return;
+  }
+
   if (grouped["支"]) {
     useEcharts({
       dom: outcomeChart.value,
@@ -165,7 +169,7 @@ onMounted(() => {
   <div>
     <div class="mb-4">
       <div>收支统计</div>
-      <div class="text-0.8rem text-text-secondary">统计收支情况</div>
+      <div class="text-0.8rem text-text-secondary">统计 {{ config.Y }} 全年的收支情况</div>
     </div>
     <div class="mb-4 f-c-b flex-wrap">
       <div class="flex-basis-33.33% max-w-33.33%">
@@ -195,7 +199,10 @@ onMounted(() => {
       </div>
     </div>
     <template v-if="grouped['支']">
-      <div class="text-1.2rem mb-2">支出</div>
+      <div class="mb-4">
+        <div>支出</div>
+        <div class="text-0.8rem text-text-secondary">本年一共有 {{ Object.keys(grouped['支']).length }} 条支出</div>
+      </div>
       <div class="mb-2 f-c-b flex-wrap">
         <div v-for="(v, k) in grouped['支']" class="mb-2 flex-basis-50% max-w-50%">
           <div>
@@ -207,7 +214,10 @@ onMounted(() => {
       <div ref="outcomeChart" style="width: 90vw; height: 50vh"></div>
     </template>
     <template v-if="grouped['收']">
-      <div class="text-1.2rem mb-2">收入</div>
+      <div class="mb-4">
+        <div>收入</div>
+        <div class="text-0.8rem text-text-secondary">本年一共有 {{ Object.keys(grouped['收']).length }} 条收入</div>
+      </div>
       <div class="mb-2 f-c-b flex-wrap">
         <div v-for="(v, k) in grouped['收']" class="mb-2 flex-basis-50% max-w-50%">
           <div>

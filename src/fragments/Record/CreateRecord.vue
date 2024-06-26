@@ -27,11 +27,12 @@ const props = defineProps({
 
 const emits = defineEmits(["onCreated"]);
 
+const config = await Database.get<IConfig>(props.database, Const.DB_CONFIG, Const.DB_KEY_CONFIG);
 const dialog = ref(false);
 const formData = reactive({
   year: props.currY,
   month: "1月",
-  budget: 5000
+  budget: config.budget
 });
 const formInst = ref<FormInstance>();
 const formRule = ref<FormRules>();
@@ -43,9 +44,9 @@ function confirmSubmit() {
       const currM = formData.month.split("月")[0];
 
       if (formData.year != props.currY) {
-        Database.get<IRecord>(props.database, Const.RECORD, formData.year).then(r => {
+        Database.get<IRecord>(props.database, Const.DB_RECORD, formData.year).then(r => {
           if (!r) {
-            Database.add(props.database, Const.RECORD, {
+            Database.add(props.database, Const.DB_RECORD, {
               id: formData.year,
               items: {
                 [currM]: {
@@ -61,7 +62,7 @@ function confirmSubmit() {
           } else {
             if (!Object.keys(r.items).includes(currM)) {
               r.items[currM] = { surplus: 0, budget: formData.budget, balance: [] };
-              Database.put(props.database, Const.RECORD, Utils.Objects.raw(r), props.currY).then(
+              Database.put(props.database, Const.DB_RECORD, Utils.Objects.raw(r), props.currY).then(
                 () => {
                   dialog.value = !dialog.value;
                   emits("onCreated", formData.year);
@@ -73,7 +74,7 @@ function confirmSubmit() {
       } else {
         if (!props.mList.includes(currM)) {
           props.data.items[currM] = { surplus: 0, budget: formData.budget, balance: [] };
-          Database.put(props.database, Const.RECORD, Utils.Objects.raw(props.data), props.currY).then(
+          Database.put(props.database, Const.DB_RECORD, Utils.Objects.raw(props.data), props.currY).then(
             () => {
               dialog.value = !dialog.value;
               emits("onCreated", formData.year);

@@ -3,7 +3,7 @@ import { ChatDotRound, Coin } from "@element-plus/icons-vue";
 import type { FormInstance, FormRules } from "element-plus";
 
 const database = await Database.create();
-const data = ref(await Database.get<{ items: IComment[] }>(database, Const.COMMENTS, "0"));
+const data = ref(await Database.get<{ items: IComment[] }>(database, Const.DB_COMMENTS, Const.DB_KEY_COMMENTS));
 const editCommentsRow = ref<IComment>();
 const delCommentsDialog = ref(false);
 const commentsEditType = ref<"新增" | "更新">("新增");
@@ -42,7 +42,7 @@ function addComments() {
           cost: formData.value.cost,
           type: formData.value.type
         });
-        Database.put(database, Const.COMMENTS, Utils.Objects.raw(data.value), "0");
+        Database.put(database, Const.DB_COMMENTS, Utils.Objects.raw(data.value), Const.DB_KEY_COMMENTS);
         commentsEditDialog.value = !commentsEditDialog.value;
       } else {
         ElMessage.error("重复添加！");
@@ -65,7 +65,7 @@ function updateComments() {
           cost: formData.value.cost,
           type: formData.value.type
         };
-        Database.put(database, Const.COMMENTS, Utils.Objects.raw(data.value), "0");
+        Database.put(database, Const.DB_COMMENTS, Utils.Objects.raw(data.value), Const.DB_KEY_COMMENTS);
         commentsEditDialog.value = !commentsEditDialog.value;
         formData.value.value = "";
         formData.value.cost = 100;
@@ -84,7 +84,7 @@ function confirmDelComments() {
   const index = data.value.items?.findIndex(item => item.value === editCommentsRow.value.value);
   if (index >= 0) {
     data.value.items.splice(index, 1);
-    Database.put(database, Const.COMMENTS, Utils.Objects.raw(data.value), "0");
+    Database.put(database, Const.DB_COMMENTS, Utils.Objects.raw(data.value), Const.DB_KEY_COMMENTS);
     delCommentsDialog.value = !delCommentsDialog.value;
   } else {
     ElMessage.error("删除失败");
@@ -122,7 +122,7 @@ function beforeCreateRemark() {
   <div>
     <div class="mb-4">
       <div>我的备注</div>
-      <div class="text-0.8rem text-text-secondary">红色代表支出，绿色代表收入</div>
+      <div class="text-0.8rem text-text-secondary">备注便于添加收入或者支出。红色支出；绿色收入。</div>
     </div>
     <div class="mb-4 f-c-e">
       <el-button plain round size="small" type="primary" @click="beforeCreateRemark">

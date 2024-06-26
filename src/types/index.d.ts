@@ -23,7 +23,9 @@ declare type IRecord = {
   items: Record<string, IMonth>;
 };
 
-declare type ViewDate = {
+declare type IConfig = {
   Y: string;
-  M: string
+  M: string;
+  budget: number;
+  isChart: boolean;
 }
